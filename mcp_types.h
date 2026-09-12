@@ -42,6 +42,11 @@ namespace mcp {
 		Content() : kind(Content::Kind::Text) {}
 
 		static Content makeText(const std::string& t);
+		static Content makeImage(const std::string& base64Data, const std::string& mime);
+		static Content makeAudio(const std::string& base64Data, const std::string& mime);
+		static Content makeResourceLink(const std::string& uri, const std::string& name, const std::string& mime = std::string(), const std::string& description = std::string());
+		static Content makeEmbeddedText(const std::string& uri, const std::string& text, const std::string& mime = std::string());
+		static Content makeEmbeddedBlob(const std::string& uri, const std::string& base64, const std::string& mime = std::string());
 	};
 
 	struct ToolParameter {
@@ -49,7 +54,7 @@ namespace mcp {
 		PropertyType type;
 		string description;
 		bool required;
-		string itemType;
+		string itemType; //the element type when the type is array
 		vector<string> enumValues;
 
 		ToolParameter() : type(PropertyType::String), required(true) {}
@@ -57,6 +62,10 @@ namespace mcp {
 
 		ToolParameter& setEnum(const vector<string>& v) {
 			enumValues = v;
+			return *this;
+		}
+		ToolParameter& setItemType(const string& t) {
+			itemType = t;
 			return *this;
 		}
 	};
