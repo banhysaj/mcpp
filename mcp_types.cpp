@@ -6,7 +6,7 @@
 
 namespace rj = rapidjson;
 
-namespace mcp {
+namespace mcpp {
 
 	Content Content::makeText(const string& t) {
 		Content c;

@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace mcp {
+namespace mcpp {
 	typedef std::string string;
 	template<typename T>
 	using vector = std::vector<T>;
