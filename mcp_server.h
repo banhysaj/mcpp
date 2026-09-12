@@ -9,6 +9,7 @@ namespace mcpp {
 
 	class Server;    //Forward declaration
 	class Transport;
+	typedef rapidjson::Document::AllocatorType Alloc;
 
 	class RequestContext {
 	public:
@@ -27,6 +28,10 @@ namespace mcpp {
 		Server* server_;
 	};
 
+
+	typedef std::function<ToolResult(const rapidjson::Value& arguments)> ToolHandler;
+	typedef std::function<ToolResult(const rapidjson::Value& arguments, RequestContext& ctx)> ToolHandlerCtx;
+
 	class Server
 	{
 		friend class RequestContext;
@@ -43,11 +48,18 @@ namespace mcpp {
 		void setTransport(Transport* transport) { transport_ = transport; }
 		std::string handleLine(const std::string& line);
 		bool initialized() const { return initialized_; }
+
 		void sendNotification(const std::string& method, const std::string& rawJsonParams = std::string("{}"));
 		void notifyToolsListChanged();
 
 	private:
-
+		struct ToolEntry {
+			Tool tool;
+			ToolHandler handler;
+			ToolHandlerCtx handlerCtx;
+			bool ctx;
+			ToolEntry() : ctx(false) {}
+		};
 
 		static std::string stripBomAndTrim(const std::string& line);
 		std::string name_;
@@ -55,8 +67,12 @@ namespace mcpp {
 		bool initialized_;
 		Transport* transport_;
 
+		void addCapabilities(rapidjson::Value& result, Alloc& a) const;
 		std::string dispatchOne(const rapidjson::Value& msg);
+		std::string finalize(const rapidjson::Value& id, const char* method, bool stateless, rapidjson::Document& resultDoc);
+		std::string makeError(const rapidjson::Value& id, int code, const std::string& message);
+		void buildServerInfo(rapidjson::Value& out, Alloc& a) const;
 
-		std::string onToolsList(const rapidjson::Value& id, bool stateless);
+		std::string onInitialize(const rapidjson::Value& id, const rapidjson::Value& params);
 	};
 }

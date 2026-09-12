@@ -21,11 +21,11 @@ namespace mcpp {
             for (std::size_t i = 0; i < N; ++i) if (v == arr[i]) return true;
             return false;
         }
-
-        bool isStatelessVersion(const std::string& v) { return inList(kStatelessVersions, v); }
-        bool isStatefulVersion(const std::string& v) { return inList(kStatefulVersions, v); }
-        const char* defaultStatefulVersion() { return kStatefulVersions[0]; }
     }
+
+    bool isStatelessVersion(const std::string& v) { return inList(kStatelessVersions, v); }
+    bool isStatefulVersion(const std::string& v) { return inList(kStatefulVersions, v); }
+    const char* defaultStatefulVersion() { return kStatefulVersions[0]; }
 
     std::vector<std::string> supportedProtocolVersions() {
         std::vector<std::string> out;
