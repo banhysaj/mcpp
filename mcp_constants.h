@@ -5,6 +5,22 @@
 
 namespace mcpp {
 
+	extern const char* const kProtocolVersionLatest;
+
+	// _meta keys
+	extern const char* const kMetaProtocolVersion;
+	extern const char* const kMetaClientInfo;
+	extern const char* const kMetaClientCapabilities;
+	extern const char* const kMetaServerInfo;
+
+	// Protocol-version negotiation. Separate between stateless and stateful, as of now
+	// the latest version is the only one that is stateless
+	// "stateless" = 2026-07-28 (no handshake), "stateful" = all the ones before this
+	bool isStatelessVersion(const std::string& v);
+	bool isStatefulVersion(const std::string& v);
+	const char* defaultStatefulVersion(); // negotiated when the client asks for none
+	std::vector<std::string> supportedProtocolVersions(); // stateless first, then stateful
+
   ///////////////////// MCP PROTOCOL //////////////////////
 
   //methods

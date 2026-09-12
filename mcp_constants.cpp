@@ -5,6 +5,39 @@
 
 namespace mcpp {
 
+    const char* const kProtocolVersionLatest = "2026-07-28";
+    const char* const kMetaProtocolVersion = "io.modelcontextprotocol/protocolVersion";
+    const char* const kMetaClientInfo = "io.modelcontextprotocol/clientInfo";
+    const char* const kMetaClientCapabilities = "io.modelcontextprotocol/clientCapabilities";
+    const char* const kMetaServerInfo = "io.modelcontextprotocol/serverInfo";
+
+    namespace {
+        // Published MCP protocol revisions (newest first)
+        const char* const kStatelessVersions[] = { "2026-07-28" };
+        const char* const kStatefulVersions[] = { "2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05" };
+
+        template <std::size_t N>
+        bool inList(const char* const (&arr)[N], const std::string& v) {
+            for (std::size_t i = 0; i < N; ++i) if (v == arr[i]) return true;
+            return false;
+        }
+
+        bool isStatelessVersion(const std::string& v) { return inList(kStatelessVersions, v); }
+        bool isStatefulVersion(const std::string& v) { return inList(kStatefulVersions, v); }
+        const char* defaultStatefulVersion() { return kStatefulVersions[0]; }
+    }
+
+    std::vector<std::string> supportedProtocolVersions() {
+        std::vector<std::string> out;
+        for (std::size_t i = 0; i < sizeof(kStatelessVersions) / sizeof(kStatelessVersions[0]); ++i) {
+            out.push_back(kStatelessVersions[i]);
+        }
+        for (std::size_t i = 0; i < sizeof(kStatefulVersions) / sizeof(kStatefulVersions[0]); ++i) {
+            out.push_back(kStatefulVersions[i]);
+        }
+        return out;
+    }
+
   ////////////////////////// MCP Protocol //////////////////////
 
   // Methods

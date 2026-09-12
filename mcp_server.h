@@ -2,6 +2,7 @@
 
 #include <string>
 #include "mcp_types.h"
+#include "mcp_json.h"
 #include <functional>
 
 namespace mcpp {
@@ -38,6 +39,7 @@ namespace mcpp {
 		const std::string& version() const { return version_; }
 
 		int run(); // serve over stdio
+		int run(Transport& transport);
 		void setTransport(Transport* transport) { transport_ = transport; }
 		std::string handleLine(const std::string& line);
 		bool initialized() const { return initialized_; }
@@ -46,9 +48,15 @@ namespace mcpp {
 
 	private:
 
+
+		static std::string stripBomAndTrim(const std::string& line);
 		std::string name_;
 		std::string version_;
 		bool initialized_;
 		Transport* transport_;
+
+		std::string dispatchOne(const rapidjson::Value& msg);
+
+		std::string onToolsList(const rapidjson::Value& id, bool stateless);
 	};
 }
