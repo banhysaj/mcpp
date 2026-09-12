@@ -40,6 +40,8 @@ namespace mcp {
 		string description;
 
 		Content() : kind(Content::Kind::Text) {}
+
+		static Content makeText(const std::string& t);
 	};
 
 	struct ToolParameter {
@@ -61,6 +63,24 @@ namespace mcp {
 		bool hasStructuredContent;
 
 		ToolResult() : isError(false), hasStructuredContent(false) {}
+
+		static ToolResult text(const std::string& t);   // A single text block
+		static ToolResult error(const std::string& message);
+		ToolResult& add(const Content& c) {
+			content.push_back(c); return *this;
+		}
+		ToolResult& addText(const std::string& t) {
+			content.push_back(Content::makeText(t));
+			return *this;
+		}
+		ToolResult& withStructured(const std::string& rawJson) {
+			structuredContent = rawJson; hasStructuredContent = true;
+			return *this;
+		}
+		ToolResult& markError(bool e = true) {
+			isError = e;
+			return *this;
+		}
 	};
 
 	struct Tool {
@@ -68,8 +88,8 @@ namespace mcp {
 		string title;
 		string description;
 		vector<ToolParameter> properties;
-		string customInputSchema;
-		string outputSchema;
+		string customInputSchema; //When set, custom json overrides the generated schema
+		string outputSchema; //Optional raw json
 
 		Tool() {}
 		Tool(const string& n, const string& d) : name(n), description(d) {}
@@ -81,7 +101,7 @@ namespace mcp {
 		string title;
 		string description;
 		string mimeType;
-		int64_t size;
+		int64_t size; //Size in bytes, optional
 
 		Resource() : size(0) {}
 		Resource(const string& u, const string& n) : uri(u), name(n) {}
@@ -90,8 +110,8 @@ namespace mcp {
 	struct ResourceContent {
 		string uri;
 		string mimeType;
-		string text;
-		string blob;
+		string text; //If non-empty, and blob is empty, sent as text
+		string blob; //Else, sent as base64 "blob"
 		ResourceContent() {}
 	};
 }
