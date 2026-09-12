@@ -5,7 +5,6 @@
 #include <cstdint>
 
 namespace mcpp {
-	typedef std::string string;
 	template<typename T>
 	using vector = std::vector<T>;
 
@@ -31,13 +30,13 @@ namespace mcpp {
 		enum class Kind { Text, Image, Audio, ResourceLink, EmbeddedResource };
 
 		Kind kind;
-		string text;
-		string data;
-		string blob;
-		string mimeType;
-		string uri;
-		string name;
-		string description;
+		std::string text;
+		std::string data;
+		std::string blob;
+		std::string mimeType;
+		std::string uri;
+		std::string name;
+		std::string description;
 
 		Content() : kind(Content::Kind::Text) {}
 
@@ -50,21 +49,21 @@ namespace mcpp {
 	};
 
 	struct ToolParameter {
-		string name;
+		std::string name;
 		PropertyType type;
-		string description;
+		std::string description;
 		bool required;
-		string itemType; //the element type when the type is array
-		vector<string> enumValues;
+		std::string itemType; //the element type when the type is array
+		vector<std::string> enumValues;
 
 		ToolParameter() : type(PropertyType::String), required(true) {}
-		ToolParameter(const string& n, PropertyType t, const string& d, bool req = true) : name(n), type(t), description(d), required(req) {}
+		ToolParameter(const std::string& n, PropertyType t, const std::string& d, bool req = true) : name(n), type(t), description(d), required(req) {}
 
-		ToolParameter& setEnum(const vector<string>& v) {
+		ToolParameter& setEnum(const vector<std::string>& v) {
 			enumValues = v;
 			return *this;
 		}
-		ToolParameter& setItemType(const string& t) {
+		ToolParameter& setItemType(const std::string& t) {
 			itemType = t;
 			return *this;
 		}
@@ -73,7 +72,7 @@ namespace mcpp {
 	struct ToolResult {
 		vector<Content> content;
 		bool isError;
-		string structuredContent;
+		std::string structuredContent;
 		bool hasStructuredContent;
 
 		ToolResult() : isError(false), hasStructuredContent(false) {}
@@ -98,29 +97,29 @@ namespace mcpp {
 	};
 
 	struct Tool {
-		string name;
-		string title;
-		string description;
+		std::string name;
+		std::string title;
+		std::string description;
 		vector<ToolParameter> properties;
-		string customInputSchema; //When set, custom json overrides the generated schema
-		string outputSchema; //Optional raw json
+		std::string customInputSchema; //When set, custom json overrides the generated schema
+		std::string outputSchema; //Optional raw json
 
 		Tool() {}
-		Tool(const string& n, const string& d) : name(n), description(d) {}
+		Tool(const std::string& n, const std::string& d) : name(n), description(d) {}
 
-		Tool& setTitle(const string& t) {
+		Tool& setTitle(const std::string& t) {
 			title = t;
 			return *this;
 		}
-		Tool& setDescription(const string& d) {
+		Tool& setDescription(const std::string& d) {
 			description = d;
 			return *this;
 		}
-		Tool& setInputSchema(const string& rawJson) {
+		Tool& setInputSchema(const std::string& rawJson) {
 			customInputSchema = rawJson;
 			return *this;
 		}
-		Tool& setOutputSchema(const string& rawJson) {
+		Tool& setOutputSchema(const std::string& rawJson) {
 			outputSchema = rawJson;
 			return *this;
 		}
@@ -129,12 +128,12 @@ namespace mcpp {
 			properties.push_back(p);
 			return *this;
 		}
-		Tool& addParameter(const string& n, PropertyType t, const string& d, bool req = true) {
+		Tool& addParameter(const std::string& n, PropertyType t, const std::string& d, bool req = true) {
 			properties.push_back(ToolParameter(n, t, d, req));
 			return *this;
 		}
 
-		Tool& addEnumParam(const string& n, const vector<string>& values, const string& d, bool req = true) {
+		Tool& addEnumParam(const std::string& n, const vector<std::string>& values, const std::string& d, bool req = true) {
 			ToolParameter p(n, PropertyType::String, d, req);
 			p.setEnum(values);
 			return addParameter(p);
@@ -142,22 +141,22 @@ namespace mcpp {
 	};
 
 	struct Resource {
-		string uri;
-		string name;
-		string title;
-		string description;
-		string mimeType;
+		std::string uri;
+		std::string name;
+		std::string title;
+		std::string description;
+		std::string mimeType;
 		int64_t size; //Size in bytes, optional
 
 		Resource() : size(0) {}
-		Resource(const string& u, const string& n) : uri(u), name(n) {}
+		Resource(const std::string& u, const std::string& n) : uri(u), name(n) {}
 	};
 
 	struct ResourceContent {
-		string uri;
-		string mimeType;
-		string text; //If non-empty, and blob is empty, sent as text
-		string blob; //Else, sent as base64 "blob"
+		std::string uri;
+		std::string mimeType;
+		std::string text; //If non-empty, and blob is empty, sent as text
+		std::string blob; //Else, sent as base64 "blob"
 		ResourceContent() {}
 	};
 }

@@ -8,27 +8,27 @@ namespace rj = rapidjson;
 
 namespace mcpp {
 
-	Content Content::makeText(const string& t) {
+	Content Content::makeText(const std::string& t) {
 		Content c;
 		c.kind = Content::Kind::Text;
 		c.text = t;
 		return c;
 	}
-	Content Content::makeImage(const string& d, const string& m) {
+	Content Content::makeImage(const std::string& d, const std::string& m) {
 		Content c;
 		c.kind = Content::Kind::Image;
 		c.data = d;
 		c.mimeType = m;
 		return c;
 	}
-	Content Content::makeAudio(const string& d, const string& m) {
+	Content Content::makeAudio(const std::string& d, const std::string& m) {
 		Content c;
 		c.kind = Content::Kind::Audio;
 		c.data = d;
 		c.mimeType = m;
 		return c;
 	}
-	Content Content::makeResourceLink(const std::string& uri, const std::string& name, const string& mime, const std::string& desc) {
+	Content Content::makeResourceLink(const std::string& uri, const std::string& name, const std::string& mime, const std::string& desc) {
 		Content c;
 		c.kind = Content::Kind::ResourceLink;
 		c.uri = uri;
@@ -54,12 +54,12 @@ namespace mcpp {
 		return c;
 	}
 
-	ToolResult ToolResult::text(const string& t) {
+	ToolResult ToolResult::text(const std::string& t) {
 		ToolResult r;
 		r.content.push_back(Content::makeText(t));
 		return r;
 	}
-	ToolResult ToolResult::error(const string& m) {
+	ToolResult ToolResult::error(const std::string& m) {
 		ToolResult r;
 		r.isError = true;
 		r.content.push_back(Content::makeText(m));
