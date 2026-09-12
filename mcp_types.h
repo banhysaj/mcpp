@@ -54,6 +54,11 @@ namespace mcp {
 
 		ToolParameter() : type(PropertyType::String), required(true) {}
 		ToolParameter(const string& n, PropertyType t, const string& d, bool req = true) : name(n), type(t), description(d), required(req) {}
+
+		ToolParameter& setEnum(const vector<string>& v) {
+			enumValues = v;
+			return *this;
+		}
 	};
 
 	struct ToolResult {
@@ -93,6 +98,38 @@ namespace mcp {
 
 		Tool() {}
 		Tool(const string& n, const string& d) : name(n), description(d) {}
+
+		Tool& setTitle(const string& t) {
+			title = t;
+			return *this;
+		}
+		Tool& setDescription(const string& d) {
+			description = d;
+			return *this;
+		}
+		Tool& setInputSchema(const string& rawJson) {
+			customInputSchema = rawJson;
+			return *this;
+		}
+		Tool& setOutputSchema(const string& rawJson) {
+			outputSchema = rawJson;
+			return *this;
+		}
+
+		Tool& addParameter(const ToolParameter& p) {
+			properties.push_back(p);
+			return *this;
+		}
+		Tool& addParameter(const string& n, PropertyType t, const string& d, bool req = true) {
+			properties.push_back(ToolParameter(n, t, d, req));
+			return *this;
+		}
+
+		Tool& addEnumParam(const string& n, const vector<string>& values, const string& d, bool req = true) {
+			ToolParameter p(n, PropertyType::String, d, req);
+			p.setEnum(values);
+			return addParameter(p);
+		}
 	};
 
 	struct Resource {
