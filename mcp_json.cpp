@@ -1,4 +1,6 @@
 #include "mcp_json.h"
+#include "rapidjson/include/rapidjson/writer.h"
+#include "rapidjson/include/rapidjson/stringbuffer.h"
 
 namespace mcpp {
     namespace {
@@ -49,5 +51,40 @@ namespace mcpp {
             return def;
         }
         
+    }
+
+    namespace json {
+        void addStr(rj::Value& o, const char* k, const std::string& s, Alloc& a) {
+            rj::Value v(s, a);
+            o.AddMember(rj::StringRef(k), v, a);
+        }
+        void addInt(rj::Value& o, const char* k, long long n, Alloc& a) {
+            rj::Value v(static_cast<int64_t>(n)); o.AddMember(rj::StringRef(k), v, a);
+        }
+        void addBool(rj::Value& o, const char* k, bool b, Alloc& a) {
+            rj::Value v(b); o.AddMember(rj::StringRef(k), v, a);
+        }
+        void addVal(rj::Value& o, const char* k, rj::Value& v, Alloc& a) {
+            o.AddMember(rj::StringRef(k), v, a);   // moves v
+        }
+        void addKeyVal(rj::Value& o, const std::string& key, rj::Value& v, Alloc& a) {
+            rj::Value k(key, a); o.AddMember(k, v, a);
+        }
+        void pushStr(rj::Value& arr, const std::string& s, Alloc& a) {
+            rj::Value v(s, a); arr.PushBack(v, a);
+        }
+        std::string serialize(const rj::Value& v) {
+            rj::StringBuffer sb;
+            rj::Writer<rj::StringBuffer> w(sb);
+            v.Accept(w);
+            return std::string(sb.GetString(), sb.GetSize());
+        }
+        bool parseInto(const std::string& raw, rj::Value& out, Alloc& a) {
+            rj::Document d;
+            d.Parse(raw.c_str());
+            if (d.HasParseError()) return false;
+            out.CopyFrom(d, a);
+            return true;
+        }
     }
 }
