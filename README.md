@@ -44,6 +44,4 @@ guarded by an `#ifdef`, so the same source builds on Windows, Linux, and macOS.
 
 ## License
 
-RapidJSON keeps its own license under `rapidjson/license.txt` (MIT). Only its
-headers are vendored, so the JSON License clause that covers the upstream `bin/`
-directory doesn't apply here.
+RapidJSON (under `rapidjson/`) is third-party and keeps its own MIT license, please see `rapidjson/license.txt`.
