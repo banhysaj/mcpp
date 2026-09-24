@@ -5,11 +5,11 @@ servers. It handles the JSON-RPC plumbing and the MCP lifecycle, and lets you ad
 tools as ordinary C++ functions. RapidJSON is the one dependency, and it's
 included here, so you don't need to do anything else after cloning, everything should build.
 
-The repo is the protocol library, nothing else. You can use the source in your own program, register tools, then call `run()`
+The repo is the protocol library, nothing else. You can use the source in your own program, register tools, and then call `run()`
 
 ## How it works
 
-MCP commmunicates either through stdio or http, as of now, this repo only includes the stdio mode.
+MCP communicates either through stdio or http, as of now, this repo only includes the stdio mode.
 The LLM host (MCP client) launches your server as a subprocess and exchanges one JSON message per line over stdin/stdout.
 The library handles the handshake and routes each incoming request to the right place,
 so you only worry about writing the actual tools for your server, everything else gets taken care of by the library.
@@ -44,6 +44,4 @@ guarded by an `#ifdef`, so the same source builds on Windows, Linux, and macOS.
 
 ## License
 
-RapidJSON keeps its own license under `rapidjson/license.txt` (MIT). Only its
-headers are vendored, so the JSON License clause that covers the upstream `bin/`
-directory doesn't apply here.
+RapidJSON (under `rapidjson/`) is third-party and keeps its own MIT license, please see `rapidjson/license.txt`.
