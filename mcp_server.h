@@ -24,13 +24,27 @@ namespace mcpp {
 		void log(const std::string& level, const std::string& message);
 		void notify(const std::string& method, const std::string& rawJsonParams);
 
+		bool supportsElicitForm() const { return elicitForm_; }
+		bool supportsElicitUrl() const { return elicitUrl_; }
+
+		bool hasAnswer(const std::string& key) const;
+		std::string answerAction(const std::string& key) const;
+		bool accepted(const std::string& key) const;
+		const rapidjson::Value* answerContent(const std::string& key) const;
+
+		const std::string& requestState() const { return requestState_; }
+
 		Server* server() const { return server_; }
 
 	private:
 		friend class Server;
-		RequestContext() : stateless(false), hasProgressToken(false), server_(0), progressToken_(0) {}
+		RequestContext() : stateless(false), hasProgressToken(false), server_(0), progressToken_(0), inputResponses_(0), elicitForm_(false), elicitUrl_(false) {}
 		Server* server_;
 		const rapidjson::Value* progressToken_; // valid only for the duration of the call
+		const rapidjson::Value* inputResponses_;
+		std::string requestState_;
+		bool elicitForm_;
+		bool elicitUrl_;
 	};
 
 
@@ -94,7 +108,7 @@ namespace mcpp {
 		void sendNotificationDoc(const std::string& method, rapidjson::Document& params);
 
 		std::string dispatchOne(const rapidjson::Value& msg);
-		std::string finalize(const rapidjson::Value& id, const char* method, bool stateless, rapidjson::Document& resultDoc);
+		std::string finalize(const rapidjson::Value& id, const char* method, bool stateless, rapidjson::Document& resultDoc, bool inputRequired = false);
 		std::string makeError(const rapidjson::Value& id, int code, const std::string& message);
 
 		std::string onInitialize(const rapidjson::Value& id, const rapidjson::Value& params);
