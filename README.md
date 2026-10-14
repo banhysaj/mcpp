@@ -9,8 +9,8 @@ The repo is the protocol library, nothing else. You can use the source in your o
 
 ## How it works
 
-MCP communicates either through stdio or http, as of now, this repo only includes the stdio mode.
-The LLM host (MCP client) launches your server as a subprocess and exchanges one JSON message per line over stdin/stdout.
+MCP communicates either through stdio or http, this repo supports both. See [Serving over HTTP](#serving-over-http).
+Over stdio, the LLM host (MCP client) launches your server as a subprocess and exchanges one JSON message per line over stdin/stdout.
 The library handles the handshake and routes each incoming request to the right place,
 so you only worry about writing the actual tools for your server, everything else gets taken care of by the library.
 
@@ -108,12 +108,83 @@ A few things to keep in mind:
 - Nothing forces the client to come back. It may never call again, and the user
   can decline or cancel, so don't count on the second run happening.
 
+## Serving over HTTP
+
+Add `mcp_http.cpp` to your build and hand the server to an `HttpServer`:
+
+```cpp
+#include "mcp_server.h"
+#include "mcp_http.h"
+
+int main() {
+    mcpp::Server server("my-server", "1.0.0");
+    // ... add tools ...
+
+    mcpp::HttpOptions opts;
+    opts.host = "0.0.0.0";
+    opts.port = 8080;
+    opts.authorize = [](const mcpp::HttpRequest& req,
+                        std::string& principal, std::string& challenge) {
+        if (req.header("Authorization") == "Bearer secret") {
+            principal = "user-1";
+            return true;
+        }
+        challenge = "Bearer resource_metadata=\"https://example.com/.well-known/oauth-protected-resource\"";
+        return false;
+    };
+
+    mcpp::HttpServer http(server, opts);
+    return http.listen() ? 0 : 1;
+}
+```
+
+What it does:
+
+- **One endpoint, POST only.** `opts.path` (default `/mcp`). GET and DELETE get
+  405, as the 2026-07-28 spec asks.
+- **`tools/call` streams.** When the client accepts `text/event-stream`, progress
+  and log lines from `ctx` go out as SSE events before the result. Everything
+  else gets a plain JSON reply.
+- **One call at a time.** Requests arrive on cpp-httplib's threads, but the
+  `Server` and your tools only ever see one at a time, same as over stdio.
+- **Headers are checked.** For 2026-07-28 requests, `MCP-Protocol-Version`,
+  `Mcp-Method` and `Mcp-Name` must match the body, otherwise the reply is 400
+  with `HeaderMismatch` (-32020).
+- **Origin is checked.** A request whose `Origin` isn't in `allowedOrigins` gets
+  403. With an empty list only localhost origins pass. Requests with no
+  `Origin` (server to server) pass.
+- **Auth runs first.** `authorize` sees every request before anything is
+  parsed. Return true to let it through, and whatever you put in `principal`
+  reaches tools as `ctx.principal()`. Return false for a 401 with `challenge`
+  as the `WWW-Authenticate` header. Leave it unset for no auth, but then
+  anyone who can reach the port can call every tool, so keep `host` at
+  `127.0.0.1`.
+- **Deeply nested messages are refused.** Anything nested more than 128
+  levels gets an error instead of being parsed, on stdio and HTTP alike. The
+  parser is recursive, so without this one crafted message could crash the
+  server.
+
+Limits:
+
+- **No TLS.** Put a reverse proxy (Caddy, nginx) in front for HTTPS.
+- **No server-wide notifications.** `sendNotification` and
+  `notifyToolsListChanged` reach stdio clients only, and `subscriptions/listen`
+  isn't implemented.
+- **Older clients work without sessions.** Clients that start with `initialize`
+  are served, but they share one `Server`, so the initialized flag and log
+  level are shared too.
+- **No cancellation.** A client that hangs up mid-call closes the stream, but
+  the tool still runs to the end.
+
 ## Build requirements
 
 C++11 or later. The library is single-threaded and cross-platform, the only
 platform-specific piece is the Windows binary-mode setup in the stdio transport,
 guarded by an `#ifdef`, so the same source builds on Windows, Linux, and macOS.
 
+HTTP adds cpp-httplib (vendored in `httplib/`), which uses threads, so link
+pthreads (`-pthread`) on GCC/Clang and `ws2_32.lib` on Windows.
+
 ## License
 
-RapidJSON (under `rapidjson/`) is third-party and keeps its own MIT license, please see `rapidjson/license.txt`.
+RapidJSON (under `rapidjson/`) and cpp-httplib (under `httplib/`) are third-party and keep their own MIT licenses, please see `rapidjson/license.txt` and `httplib/LICENSE`.
